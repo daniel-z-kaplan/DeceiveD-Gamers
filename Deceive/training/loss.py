@@ -190,7 +190,7 @@ class StyleGAN2Loss(Loss):
         
         #We have n tensors
         #It's a list of tensors
-        print(gen_logits_t)
+#         print(gen_logits_t)
         total = 0
         for ten in gen_logits_t:
             total += torch.mean(ten)
