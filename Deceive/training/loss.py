@@ -176,8 +176,8 @@ class StyleGAN2Loss(Loss):
 #                 (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).mul(self.scaling).backward()#Changed here
                 (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).backward()#Changed here
                 
-            #If average is over .5, discriminator GAINS points, ie has lost the round.
-            #And then we scale the learning rate accordingly (a little higher).
+          
+         #If the average is low, it doesn't tell us much, because we add 3 different things oddly.
         
                 #So when we are here, we have gen_logits_t
         #We can average both the gen_logits.
@@ -197,9 +197,8 @@ class StyleGAN2Loss(Loss):
         if len(gen_logits_t) > 0:
             total /= len(gen_logits_t)
         print(total)
-        print("Gain:", gain)
-        print("total list:",gen_logits_t)
-        if total > .5:
+        #print("total list:",gen_logits_t)
+        if total < .5:
             self.G_score-=12
             self.D_score+=12
         else:
