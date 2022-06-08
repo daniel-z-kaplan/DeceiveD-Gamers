@@ -98,7 +98,7 @@ class StyleGAN2Loss(Loss):
                 self.pseudo_data = gen_img.detach()
                 gen_logits = self.run_D(gen_img, gen_c, sync=False)
                 print("Maximize logits for generated")
-                gen_logits_t.append(torch.sigmoid(gen_logits))
+                self.adjust_score(torch.sigmoid(gen_logits))
                 training_stats.report('Loss/scores/fake', gen_logits)
                 training_stats.report('Loss/signs/fake', gen_logits.sign())
                 loss_Gmain = torch.nn.functional.softplus(-gen_logits) # -log(sigmoid(gen_logits))
@@ -133,7 +133,7 @@ class StyleGAN2Loss(Loss):
                 gen_img, _gen_ws = self.run_G(gen_z, gen_c, sync=False)
                 gen_logits = self.run_D(gen_img, gen_c, sync=False) # Gets synced by loss_Dreal.
                 print("Minimize logits for generated via D")
-                gen_logits_t.append((torch.sigmoid(gen_logits)))
+                self.adjust_score(torch.sigmoid(gen_logits))#Send as is, because they wanna be zero.
                 training_stats.report('Loss/scores/fake', gen_logits)
                 training_stats.report('Loss/signs/fake', gen_logits.sign())
                 loss_Dgen = torch.nn.functional.softplus(gen_logits) # -log(1 - sigmoid(gen_logits))
@@ -157,7 +157,7 @@ class StyleGAN2Loss(Loss):
                 training_stats.report('Loss/scores/real', real_logits)
                 training_stats.report('Loss/signs/real', real_logits.sign())
                 print("Maximize logits for real via D")
-                gen_logits_t.append(torch.sigmoid(real_logits))
+                self.adjust_score(torch.sigmoid(1-real_logits))#Invert real logits, because they are meant to be 1
                 loss_Dreal = 0
                 if do_Dmain:
                     loss_Dreal = torch.nn.functional.softplus(-real_logits) # -log(sigmoid(real_logits))
@@ -177,8 +177,6 @@ class StyleGAN2Loss(Loss):
 #                 (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).backward()#Changed here
                 
           
-         #If the average is low, it doesn't tell us much, because we add 3 different things oddly.
-        
                 #So when we are here, we have gen_logits_t
         #We can average both the gen_logits.
         #Then we can average them again.
@@ -188,25 +186,18 @@ class StyleGAN2Loss(Loss):
         #So 60% = 600/1000
         #Basically we wanna move towards this by K every time, where K is a max of... 25?
         
-        #We have n tensors
-        #It's a list of tensors
-#         print(gen_logits_t)
-        total = 0
-        for ten in gen_logits_t:
-            total += torch.mean(ten)
-        if len(gen_logits_t) > 0:
-            total /= len(gen_logits_t)
-        print(total)
-        k = 2
-        #print("total list:",gen_logits_t)
-        if total < .5:
-            self.G_score-=k
-            self.D_score+=k
-        else:
-            self.G_score+=k
-            self.D_score-=k
+        
         print('G_score', self.G_score)
         print('D_score', self.D_score)
 
         #Maybe a light reinforcement learning?
 #----------------------------------------------------------------------------
+    def adjust_score(self, logits, k = 2):
+        mean = torch.mean(logits)
+        if mean < .5:
+            self.G_score-=k
+            self.D_score+=k
+        else:
+            self.G_score+=k
+            self.D_score-=k
+        
