@@ -82,6 +82,10 @@ class StyleGAN2Loss(Loss):
         do_Dr1   = (phase in ['Dreg', 'Dboth']) and (self.r1_gamma != 0)
 
         #So it does A, then B, then C/D, then part of D
+        
+        #So what happened id generator started getting higher than D. 
+        #We scale loss by the ratio. So if G is higher than D, we send MORE loss.
+        #
         self.scaling = self.G_score/self.D_score
         gen_logits_t = []
         
@@ -92,6 +96,7 @@ class StyleGAN2Loss(Loss):
                 # Update pseudo data
                 self.pseudo_data = gen_img.detach()
                 gen_logits = self.run_D(gen_img, gen_c, sync=False)
+                print("Maximize logits for generated")
                 gen_logits_t.append(torch.sigmoid(gen_logits))
                 training_stats.report('Loss/scores/fake', gen_logits)
                 training_stats.report('Loss/signs/fake', gen_logits.sign())
@@ -126,6 +131,7 @@ class StyleGAN2Loss(Loss):
             with torch.autograd.profiler.record_function('Dgen_forward'):
                 gen_img, _gen_ws = self.run_G(gen_z, gen_c, sync=False)
                 gen_logits = self.run_D(gen_img, gen_c, sync=False) # Gets synced by loss_Dreal.
+                print("Minimize logits for generated via D")
                 gen_logits_t.append((torch.sigmoid(gen_logits)))
                 training_stats.report('Loss/scores/fake', gen_logits)
                 training_stats.report('Loss/signs/fake', gen_logits.sign())
@@ -148,6 +154,7 @@ class StyleGAN2Loss(Loss):
                 real_logits = self.run_D(real_img_tmp, real_c, sync=sync)
                 training_stats.report('Loss/scores/real', real_logits)
                 training_stats.report('Loss/signs/real', real_logits.sign())
+                print("Maximize logits for real via D")
                 gen_logits_t.append(torch.sigmoid(real_logits))
                 loss_Dreal = 0
                 if do_Dmain:
