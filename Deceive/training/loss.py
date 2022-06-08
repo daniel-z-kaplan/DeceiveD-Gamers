@@ -89,6 +89,7 @@ class StyleGAN2Loss(Loss):
         self.scaling = self.G_score/self.D_score
         gen_logits_t = []
         
+        #D aims to predict 0's, or fakes. Because this is how G is doing, we invert it.
         # Gmain: Maximize logits for generated images.
         if do_Gmain:
             with torch.autograd.profiler.record_function('Gmain_forward'):
@@ -137,7 +138,8 @@ class StyleGAN2Loss(Loss):
                 training_stats.report('Loss/signs/fake', gen_logits.sign())
                 loss_Dgen = torch.nn.functional.softplus(gen_logits) # -log(1 - sigmoid(gen_logits))
             with torch.autograd.profiler.record_function('Dgen_backward'):
-                loss_Dgen.mean().mul(gain).mul(self.scaling).backward()#Changed now
+#                 loss_Dgen.mean().mul(gain).mul(self.scaling).backward()#Changed now
+                loss_Dgen.mean().mul(gain).backward()#Changed now
         
         
         # Dmain: Maximize logits for real images.
@@ -171,7 +173,8 @@ class StyleGAN2Loss(Loss):
                     training_stats.report('Loss/D/reg', loss_Dr1)
 
             with torch.autograd.profiler.record_function(name + '_backward'):
-                (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).mul(self.scaling).backward()#Changed here
+#                 (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).mul(self.scaling).backward()#Changed here
+                (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).backward()#Changed here
                 
             #If average is over .5, discriminator GAINS points, ie has lost the round.
             #And then we scale the learning rate accordingly (a little higher).
