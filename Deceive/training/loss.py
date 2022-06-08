@@ -138,8 +138,8 @@ class StyleGAN2Loss(Loss):
                 training_stats.report('Loss/signs/fake', gen_logits.sign())
                 loss_Dgen = torch.nn.functional.softplus(gen_logits) # -log(1 - sigmoid(gen_logits))
             with torch.autograd.profiler.record_function('Dgen_backward'):
-#                 loss_Dgen.mean().mul(gain).mul(self.scaling).backward()#Changed now
-                loss_Dgen.mean().mul(gain).backward()#Changed now
+                loss_Dgen.mean().mul(gain).mul(self.scaling).backward()#Changed now
+#                 loss_Dgen.mean().mul(gain).backward()#Changed now
         
         
         # Dmain: Maximize logits for real images.
@@ -173,8 +173,8 @@ class StyleGAN2Loss(Loss):
                     training_stats.report('Loss/D/reg', loss_Dr1)
 
             with torch.autograd.profiler.record_function(name + '_backward'):
-#                 (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).mul(self.scaling).backward()#Changed here
-                (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).backward()#Changed here
+                (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).mul(self.scaling).backward()#Changed here
+#                 (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).backward()#Changed here
                 
           
          #If the average is low, it doesn't tell us much, because we add 3 different things oddly.
@@ -197,13 +197,14 @@ class StyleGAN2Loss(Loss):
         if len(gen_logits_t) > 0:
             total /= len(gen_logits_t)
         print(total)
+        k = 2
         #print("total list:",gen_logits_t)
         if total < .5:
-            self.G_score-=12
-            self.D_score+=12
+            self.G_score-=k
+            self.D_score+=k
         else:
-            self.G_score+=12
-            self.D_score-=12
+            self.G_score+=k
+            self.D_score-=k
         print('G_score', self.G_score)
         print('D_score', self.D_score)
 
