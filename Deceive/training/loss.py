@@ -107,6 +107,7 @@ class StyleGAN2Loss(Loss):
         #We scale loss by the ratio. So if G is higher than D, we send MORE loss.
         #
         self.scaling = self.G_score/self.D_score
+        print(self.scaling)
         gen_logits_t = []
         
         #D aims to predict 0's, or fakes. Because this is how G is doing, we invert it.
