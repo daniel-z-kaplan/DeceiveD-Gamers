@@ -162,8 +162,7 @@ class StyleGAN2Loss(Loss):
                 print(loss_Dgen.mean())
                 print(loss_Dgen.mean().mul(gain))
                 print(loss_Dgen.mean().mul(gain).mul(self.scaling))
-#                 loss_Dgen.mean().mul(gain).mul(self.scaling).backward()#Changed now
-                loss_Dgen.mean().mul(gain).mul(.9).backward()#Changed now
+                loss_Dgen.mean().mul(gain).mul(self.scaling).backward()#Changed now
 #                 loss_Dgen.mean().mul(gain).backward()#Changed now
         
         
