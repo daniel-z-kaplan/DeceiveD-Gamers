@@ -41,6 +41,7 @@ class StyleGAN2Loss(Loss):
         self.pseudo_data = None
         self.G_score = 500
         self.D_score = 500
+        self.scaling = 1
         torch.autograd.set_detect_anomaly(True)
 
     def run_G(self, z, c, sync):
