@@ -153,7 +153,7 @@ class StyleGAN2Loss(Loss):
                 gen_img, _gen_ws = self.run_G(gen_z, gen_c, sync=False)
                 gen_logits = self.run_D(gen_img, gen_c, sync=False) # Gets synced by loss_Dreal.
                 print("Minimize logits for generated via D")
-                self.adjust_score(torch.sigmoid(gen_logits))#Send as is, because they wanna be zero.
+                adjust_score(torch.sigmoid(gen_logits))#Send as is, because they wanna be zero.
                 training_stats.report('Loss/scores/fake', gen_logits)
                 training_stats.report('Loss/signs/fake', gen_logits.sign())
                 loss_Dgen = torch.nn.functional.softplus(gen_logits) # -log(1 - sigmoid(gen_logits))
@@ -182,7 +182,7 @@ class StyleGAN2Loss(Loss):
                 training_stats.report('Loss/scores/real', real_logits)
                 training_stats.report('Loss/signs/real', real_logits.sign())
                 print("Maximize logits for real via D")
-                self.adjust_score(torch.sigmoid(1-real_logits))#Invert real logits, because they are meant to be 1
+                adjust_score(torch.sigmoid(1-real_logits))#Invert real logits, because they are meant to be 1
                 loss_Dreal = 0
                 if do_Dmain:
                     loss_Dreal = torch.nn.functional.softplus(-real_logits) # -log(sigmoid(real_logits))
