@@ -41,7 +41,7 @@ class StyleGAN2Loss(Loss):
         self.pseudo_data = None
         self.G_score = torch.tensor(500.0).to(device)
         self.D_score = torch.tensor(500.0).to(device)
-        self.scaling = 1
+        self.scaling = torch.tensor(1.0).to(device)
         torch.autograd.set_detect_anomaly(True)
 
     def run_G(self, z, c, sync):
@@ -99,6 +99,8 @@ class StyleGAN2Loss(Loss):
             #.5 and .4, change is .1, change * k = 2.4. G loses 2.4, D gains 2.4
             self.G_score -= change * k
             self.D_score += change * k
+            self.scaling = self.G_score/self.D_score
+            print("Adjust scaling:",self.scaling)
         
         
         #So it does A, then B, then C/D, then part of D
@@ -106,8 +108,7 @@ class StyleGAN2Loss(Loss):
         #So what happened id generator started getting higher than D. 
         #We scale loss by the ratio. So if G is higher than D, we send MORE loss.
         #
-        self.scaling = self.G_score/self.D_score
-        print(self.scaling)
+        
         gen_logits_t = []
         
         #D aims to predict 0's, or fakes. Because this is how G is doing, we invert it.
