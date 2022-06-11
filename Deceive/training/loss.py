@@ -118,7 +118,7 @@ class StyleGAN2Loss(Loss):
                 self.pseudo_data = gen_img.detach()
                 gen_logits = self.run_D(gen_img, gen_c, sync=False)
                 print("Maximize logits for generated")
-                self.adjust_score(torch.sigmoid(gen_logits))
+                adjust_score(torch.sigmoid(gen_logits))
                 training_stats.report('Loss/scores/fake', gen_logits)
                 training_stats.report('Loss/signs/fake', gen_logits.sign())
                 loss_Gmain = torch.nn.functional.softplus(-gen_logits) # -log(sigmoid(gen_logits))
