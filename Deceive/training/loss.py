@@ -207,9 +207,6 @@ class StyleGAN2Loss(Loss):
         #So 60% = 600/1000
         #Basically we wanna move towards this by K every time, where K is a max of... 25?
         
-        
-        print('G_score', self.G_score)
-        print('D_score', self.D_score)
 
         #Maybe a light reinforcement learning?
 #----------------------------------------------------------------------------
