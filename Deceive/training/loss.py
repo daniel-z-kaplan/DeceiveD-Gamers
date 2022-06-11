@@ -143,8 +143,9 @@ class StyleGAN2Loss(Loss):
                 print(loss_Dgen)
                 print(loss_Dgen.mean())
                 print(loss_Dgen.mean().mul(gain))
-                print(loss_Dgen.mean().mul(gain).mul_(self.scaling))
-                loss_Dgen.mean().mul(gain).mul_(self.scaling).backward()#Changed now
+                print(loss_Dgen.mean().mul(gain).mul(self.scaling))
+#                 loss_Dgen.mean().mul(gain).mul(self.scaling).backward()#Changed now
+                loss_Dgen.mean().mul(gain).mul(.9).backward()#Changed now
 #                 loss_Dgen.mean().mul(gain).backward()#Changed now
         
         
@@ -179,7 +180,7 @@ class StyleGAN2Loss(Loss):
                     training_stats.report('Loss/D/reg', loss_Dr1)
 
             with torch.autograd.profiler.record_function(name + '_backward'):
-                (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).mul_(self.scaling).backward()#Changed here
+                (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).mul(self.scaling).backward()#Changed here
 #                 (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).backward()#Changed here
                 
           
