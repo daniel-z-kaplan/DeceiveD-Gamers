@@ -160,6 +160,8 @@ class StyleGAN2Loss(Loss):
                 loss_Dgen = torch.nn.functional.softplus(gen_logits) # -log(1 - sigmoid(gen_logits))
             with torch.autograd.profiler.record_function('Dgen_backward'):
                 print("Scaling tensor:",self.scaling)
+                print("G_score":,self.G_score)
+                print("D_score":,self.D_score)
                 loss_Dgen.mean().mul(gain).mul(self.scaling).backward()#Changed now
 #                 loss_Dgen.mean().mul(gain).backward()#Changed now
         
