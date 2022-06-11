@@ -192,12 +192,28 @@ class StyleGAN2Loss(Loss):
 
         #Maybe a light reinforcement learning?
 #----------------------------------------------------------------------------
-    def adjust_score(self, logits, k = 2):
+    #k is max score, or base score? Base score is 1, max score is... 24
+    #So for a base of 500/500, this means that if the logit is .6, our ratio of G/(G+D) = 6
+    #Adjust towards that, up to K. 
+    
+    def adjust_score(self, logits, k = 24):
+        
+        print("Received logits", logits)
+        print('G_score', self.G_score)
+        print('D_score', self.D_score)
+
         mean = torch.mean(logits)
-        if mean < .5:
-            self.G_score-=k
-            self.D_score+=k
-        else:
-            self.G_score+=k
-            self.D_score-=k
+        change = self.scaling - mean #So when scaling is .5 and mean is .6, discriminator is doing better than expected. Change = -.1, times K. Let's try this for now-ish..
+        #.5 and .6, change = -.1, change * k = -2.4. G gains 2.4, D loses 2.4
+        #.5 and .4, change is .1, change * k = 2.4. G loses 2.4, D gains 2.4
+        self.G_score -= change * k
+        self.D_score += change * k
+        
+#         if mean < .5:
+#             self.G_score-=k
+#             self.D_score+=k
+#         else:#Discriminator did poorly, lower it's rating
+            
+#             self.G_score+=k
+#             self.D_score-=k
         
