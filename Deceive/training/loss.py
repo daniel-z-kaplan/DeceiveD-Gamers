@@ -39,8 +39,8 @@ class StyleGAN2Loss(Loss):
         self.pl_mean = torch.zeros([], device=device)
         self.with_dataaug = with_dataaug
         self.pseudo_data = None
-        self.G_score = 500
-        self.D_score = 500
+        self.G_score = torch.tensor(500)
+        self.D_score = torch.tensor(500)
         self.scaling = 1
         torch.autograd.set_detect_anomaly(True)
 
