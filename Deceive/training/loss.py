@@ -39,8 +39,8 @@ class StyleGAN2Loss(Loss):
         self.pl_mean = torch.zeros([], device=device)
         self.with_dataaug = with_dataaug
         self.pseudo_data = None
-        self.G_score = torch.tensor(500.0).to(device)
-        self.D_score = torch.tensor(500.0).to(device)
+        self.G_score = torch.tensor(500.0, requires_grad = False).to(device)
+        self.D_score = torch.tensor(500.0, requires_grad = False).to(device)
         torch.autograd.set_detect_anomaly(True)
 
     def run_G(self, z, c, sync):
@@ -96,6 +96,7 @@ class StyleGAN2Loss(Loss):
             change = torch.sub(torch.divide(self.G_score, self.D_score), mean) #So when scaling is .5 and mean is .6, discriminator is doing better than expected. Change = -.1, times K. Let's try this for now-ish..
             #.5 and .6, change = -.1, change * k = -2.4. G gains 2.4, D loses 2.4
             #.5 and .4, change is .1, change * k = 2.4. G loses 2.4, D gains 2.4
+            #Times change penalization is off I think
             self.G_score = torch.sub(self.G_score,torch.mul(change, k))
             self.D_score = torch.add(self.D_score,torch.mul(change, k))
             print("Change", change)
@@ -166,7 +167,9 @@ class StyleGAN2Loss(Loss):
                 print("Scaling tensor:",scaling)
                 print("G_score:",self.G_score)
                 print("D_score:",self.D_score)
-                G_score_temp = torch.clone(self.G_score).detach()
+                #Something about how this goes backwards means it hits the same things twice....
+                #Possibly because it hits change, and then G_score and D_score...
+                #Should we detach them?
                 loss_Dgen.mean().mul(gain).mul(scaling).backward()#Changed now
 #                 loss_Dgen.mean().mul(gain).backward()
                 print(self.G_score)
