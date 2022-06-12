@@ -41,7 +41,6 @@ class StyleGAN2Loss(Loss):
         self.pseudo_data = None
         self.G_score = torch.tensor(500.0).to(device)
         self.D_score = torch.tensor(500.0).to(device)
-        self.scaling = torch.tensor(1.0).to(device)
         torch.autograd.set_detect_anomaly(True)
 
     def run_G(self, z, c, sync):
@@ -94,13 +93,12 @@ class StyleGAN2Loss(Loss):
             print('D_score', self.D_score)
 
             mean = torch.mean(logits)
-            change = self.scaling - mean #So when scaling is .5 and mean is .6, discriminator is doing better than expected. Change = -.1, times K. Let's try this for now-ish..
+            change = self.G_score/self.D_score - mean #So when scaling is .5 and mean is .6, discriminator is doing better than expected. Change = -.1, times K. Let's try this for now-ish..
             #.5 and .6, change = -.1, change * k = -2.4. G gains 2.4, D loses 2.4
             #.5 and .4, change is .1, change * k = 2.4. G loses 2.4, D gains 2.4
             self.G_score -= change * k
             self.D_score += change * k
-            self.scaling = self.G_score/self.D_score
-            print("Adjust scaling:",self.scaling)
+            print("Adjust scaling:",self.G_score/self.D_score)
         
         
         #So it does A, then B, then C/D, then part of D
@@ -160,10 +158,11 @@ class StyleGAN2Loss(Loss):
                 training_stats.report('Loss/signs/fake', gen_logits.sign())
                 loss_Dgen = torch.nn.functional.softplus(gen_logits) # -log(1 - sigmoid(gen_logits))
             with torch.autograd.profiler.record_function('Dgen_backward'):
-                print("Scaling tensor:",self.scaling)
+                scaling = self.G_score/self.D_score
+                print("Scaling tensor:",scaling)
                 print("G_score:",self.G_score)
                 print("D_score:",self.D_score)
-                loss_Dgen.mean().mul(gain).mul(self.scaling).backward()#Changed now
+                loss_Dgen.mean().mul(gain).mul(scaling).backward()#Changed now
 #                 loss_Dgen.mean().mul(gain).backward()#Changed now
         
         
@@ -198,7 +197,8 @@ class StyleGAN2Loss(Loss):
                     training_stats.report('Loss/D/reg', loss_Dr1)
 
             with torch.autograd.profiler.record_function(name + '_backward'):
-                (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).mul(self.scaling).backward()#Changed here
+                scaling = self.G_score/self.D_score
+                (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).mul(scaling).backward()#Changed here
 #                 (real_logits * 0 + loss_Dreal + loss_Dr1).mean().mul(gain).backward()#Changed here
                 
           
