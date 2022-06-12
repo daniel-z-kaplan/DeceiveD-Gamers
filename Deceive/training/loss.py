@@ -167,14 +167,8 @@ class StyleGAN2Loss(Loss):
                 print("Scaling tensor:",scaling)
                 print("G_score:",self.G_score)
                 print("D_score:",self.D_score)
-                #Something about how this goes backwards means it hits the same things twice....
-                #Possibly because it hits change, and then G_score and D_score...
-                #Should we detach them?
                 loss_Dgen.mean().mul(gain).mul(scaling).backward()#Changed now
-#                 loss_Dgen.mean().mul(gain).backward()
-                print(self.G_score)
-                print(G_Score_temp)
-                
+#                 loss_Dgen.mean().mul(gain).backward()         
         
         
         # Dmain: Maximize logits for real images.
