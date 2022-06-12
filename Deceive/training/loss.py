@@ -98,6 +98,10 @@ class StyleGAN2Loss(Loss):
             #.5 and .4, change is .1, change * k = 2.4. G loses 2.4, D gains 2.4
             self.G_score -= change * k
             self.D_score += change * k
+            print("Change", change)
+            print('G_score', self.G_score)
+            print('D_score', self.D_score)
+
             print("Adjust scaling:",self.G_score/self.D_score)
         
         
