@@ -93,17 +93,18 @@ class StyleGAN2Loss(Loss):
             print('D_score', self.D_score)
 
             mean = torch.mean(logits)
+            print("Logits mean:", mean)
             change = torch.sub(torch.divide(self.G_score, self.D_score), mean).detach() #So when scaling is .5 and mean is .6, discriminator is doing better than expected. Change = -.1, times K. Let's try this for now-ish..
             #.5 and .6, change = -.1, change * k = -2.4. G gains 2.4, D loses 2.4
             #.5 and .4, change is .1, change * k = 2.4. G loses 2.4, D gains 2.4
             #Times change penalization is off I think
+            print("Change factor:",change)
+            print("Should change by this much:", torch.mul(change,k))
             self.G_score = torch.sub(self.G_score,torch.mul(change, k))
             self.D_score = torch.add(self.D_score,torch.mul(change, k))
-            print("Change", change)
             print('G_score', self.G_score)
             print('D_score', self.D_score)
-
-            print("Adjust scaling:",self.G_score/self.D_score)
+            print("Adjusted scaling:",self.G_score/self.D_score)
         
         
         #So it does A, then B, then C/D, then part of D
