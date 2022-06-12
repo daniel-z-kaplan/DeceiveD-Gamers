@@ -166,7 +166,7 @@ class StyleGAN2Loss(Loss):
                 print("Scaling tensor:",scaling)
                 print("G_score:",self.G_score)
                 print("D_score:",self.D_score)
-                G_score_temp = torch.clone(self.G_score)
+                G_score_temp = torch.clone(self.G_score).detach()
                 loss_Dgen.mean().mul(gain).mul(scaling).backward()#Changed now
 #                 loss_Dgen.mean().mul(gain).backward()
                 print(self.G_score)
