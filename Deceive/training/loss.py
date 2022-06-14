@@ -86,7 +86,7 @@ class StyleGAN2Loss(Loss):
         #So for a base of 500/500, this means that if the logit is .6, our ratio of G/(G+D) = 6
         #Adjust towards that, up to K. 
 
-        def adjust_score(logits, k = 64.0):
+        def adjust_score(logits, k = 70.0):
 
             print("Received logits", logits)
             print('G_score', self.G_score)
