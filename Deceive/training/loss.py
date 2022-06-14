@@ -97,7 +97,10 @@ class StyleGAN2Loss(Loss):
             change = torch.sub(torch.divide(torch.divide(self.G_score, self.D_score),2), mean).detach() #So when scaling is .5 and mean is .6, discriminator is doing better than expected. Change = -.1, times K. Let's try this for now-ish..
             #.5 and .6, change = -.1, change * k = -2.4. G gains 2.4, D loses 2.4
             #.5 and .4, change is .1, change * k = 2.4. G loses 2.4, D gains 2.4
-            #Times change penalization is off I think
+            #So we use change * k as the factor to change by
+            #But it shouldn't keep going up when elo difference is high...?
+            #We should use a higher BASE value, but actually have it stop going up as it goes up
+            #It's a catchup mechanism
             print("Change factor:",change)
             print("Should change by this much:", torch.mul(change,k))
             self.G_score = torch.sub(self.G_score,torch.mul(change, k))
