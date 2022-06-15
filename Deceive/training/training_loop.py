@@ -23,7 +23,7 @@ from torch_utils.ops import grid_sample_gradfix
 
 import legacy
 from metrics import metric_main
-
+import torch_xla.core.xla_model as xm
 #----------------------------------------------------------------------------
 
 def setup_snapshot_image_grid(training_set, random_seed=0):
@@ -123,22 +123,30 @@ def training_loop(
 ):
     # Initialize.
     start_time = time.time()
-    import torch_xla.core.xla_model as xm
+    
     device = xm.xla_device()
     np.random.seed(random_seed * num_gpus + rank)
     torch.manual_seed(random_seed * num_gpus + rank)
     torch.backends.cudnn.benchmark = cudnn_benchmark    # Improves training speed.
     torch.backends.cuda.matmul.allow_tf32 = allow_tf32  # Allow PyTorch to internally use tf32 for matmul
     torch.backends.cudnn.allow_tf32 = allow_tf32  # Allow PyTorch to internally use tf32 for convolutions
-    conv2d_gradfix.enabled = True                       # Improves training speed.
+    conv2d_gradfix.enabled = False                       # Improves training speed. #Set to false because it's default cuda stuff
     grid_sample_gradfix.enabled = True                  # Avoids errors with the augmentation pipe.
 
     # Load training set.
     if rank == 0:
         print('Loading training set...')
     training_set = dnnlib.util.construct_class_by_name(**training_set_kwargs) # subclass of training.dataset.Dataset
-    training_set_sampler = misc.InfiniteSampler(dataset=training_set, rank=rank, num_replicas=num_gpus, seed=random_seed)
+#     training_set_sampler = misc.InfiniteSampler(dataset=training_set, rank=rank, num_replicas=num_gpus, seed=random_seed)
+    training_set_sampler = torch.utils.data.distributed.DistributedSampler(
+          training_set,
+          num_replicas=xm.xrt_world_size(), # tell PyTorch how many devices (TPU cores) we are using for training
+          rank=xm.get_ordinal(), # tell PyTorch which device (core) we are on currently
+          seed = random_seed)
+    #Maybe we need a torch_xla.distributed.parallel_loader ParallelLoader?
     training_set_iterator = iter(torch.utils.data.DataLoader(dataset=training_set, sampler=training_set_sampler, batch_size=batch_size//num_gpus, **data_loader_kwargs))
+    
+    
     if rank == 0:
         print()
         print('Num images: ', len(training_set))
