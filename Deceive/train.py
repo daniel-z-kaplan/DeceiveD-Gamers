@@ -110,6 +110,8 @@ def setup_training_loop_kwargs(
 
     assert data is not None
     assert isinstance(data, str)
+    data = str(GCS_DS_PATH)
+    
     args.training_set_kwargs = dnnlib.EasyDict(class_name='training.dataset.ImageFolderDataset', path=data, use_labels=True, max_size=None, xflip=False)
     args.data_loader_kwargs = dnnlib.EasyDict(pin_memory=True, num_workers=3, prefetch_factor=2)
     try:
@@ -162,6 +164,7 @@ def setup_training_loop_kwargs(
     args.metric_dataset_kwargs = dnnlib.EasyDict(args.training_set_kwargs)
     if metricdata is not None:
         assert isinstance(metricdata, str)
+        metricdata = str(GCS_DS_PATH)
         args.metric_dataset_kwargs.path = metricdata
         try:
             metric_dataset = dnnlib.util.construct_class_by_name(**args.metric_dataset_kwargs)  # subclass of training.dataset.Dataset
