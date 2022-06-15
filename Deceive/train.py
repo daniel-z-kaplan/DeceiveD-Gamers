@@ -29,6 +29,12 @@ from torch_utils import custom_ops
 class UserError(Exception):
     pass
 
+from kaggle_datasets import KaggleDatasets
+import tensorflow as tf
+GCS_DS_PATH = KaggleDatasets().get_gcs_path()
+print(GCS_DS_PATH)
+
+
 #----------------------------------------------------------------------------
 
 def setup_training_loop_kwargs(
@@ -38,14 +44,14 @@ def setup_training_loop_kwargs(
     seed         = None, # Random seed: <int>, default = 0
 
     # Dataset.
-    data         = None, # Training dataset (required): <path>
+    data         = GCS_DS_PATH, # Training dataset (required): <path>
     cond         = None, # Train conditional model based on dataset labels: <bool>, default = False
     subset       = None, # Train with only N images: <int>, default = all
     mirror       = None, # Augment dataset with x-flips: <bool>, default = False
 
     # Metrics (not included in desc).
     metrics      = None, # List of metric names: [], ['fid50k_full'] (default), ...
-    metricdata   = None, # Metric dataset (optional): <path>
+    metricdata   = GCS_DS_PATH, # Metric dataset (optional): <path>
 
     # Base config.
     cfg          = None, # Base config: 'auto' (default), 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar'
@@ -77,6 +83,7 @@ def setup_training_loop_kwargs(
     # General options: gpus, snap, seed
     # ------------------------------------------
 
+    
     if gpus is None:
         gpus = 1
     assert isinstance(gpus, int)
