@@ -15,7 +15,7 @@ import uuid
 import numpy as np
 import torch
 import dnnlib
-
+import torch_xla.core.xla_model as xm
 #----------------------------------------------------------------------------
 
 class MetricOptions:
@@ -26,7 +26,7 @@ class MetricOptions:
         self.dataset_kwargs = dnnlib.EasyDict(dataset_kwargs)
         self.num_gpus       = num_gpus
         self.rank           = rank
-        self.device         = device if device is not None else torch.device('cuda', rank)
+        self.device         = device if device is not None else device = xm.xla_device()
         self.progress       = progress.sub() if progress is not None and rank == 0 else ProgressMonitor()
         self.cache          = cache
 
