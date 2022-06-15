@@ -26,7 +26,7 @@ class MetricOptions:
         self.dataset_kwargs = dnnlib.EasyDict(dataset_kwargs)
         self.num_gpus       = num_gpus
         self.rank           = rank
-        self.device         = device if device is not None else device = xm.xla_device()
+        self.device         = device if device is not None else xm.xla_device()
         self.progress       = progress.sub() if progress is not None and rank == 0 else ProgressMonitor()
         self.cache          = cache
 
