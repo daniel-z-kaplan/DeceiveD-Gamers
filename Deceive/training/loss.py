@@ -24,7 +24,7 @@ class Loss:
 #----------------------------------------------------------------------------
 
 class StyleGAN2Loss(Loss):
-    def __init__(self, device, G_mapping, G_synthesis, D, augment_pipe=None, style_mixing_prob=0.9, r1_gamma=10, pl_batch_shrink=2, pl_decay=0.01, pl_weight=2, with_dataaug=False):
+    def __init__(self, device, G_mapping, G_synthesis, D, augment_pipe=None, style_mixing_prob=0.9, r1_gamma=10, pl_batch_shrink=2, pl_decay=0.01, pl_weight=2, with_dataaug=False, k = 100):
         super().__init__()
         self.device = device
         self.G_mapping = G_mapping
@@ -42,6 +42,7 @@ class StyleGAN2Loss(Loss):
         self.G_score = torch.tensor(500.0, requires_grad = False)
         self.D_score = torch.tensor(500.0, requires_grad = False)
         torch.autograd.set_detect_anomaly(True)
+        self.k = k
 
     def run_G(self, z, c, sync):
         with misc.ddp_sync(self.G_mapping, sync):
@@ -86,8 +87,9 @@ class StyleGAN2Loss(Loss):
         #So for a base of 500/500, this means that if the logit is .6, our ratio of G/(G+D) = 6
         #Adjust towards that, up to K. 
 
-        def adjust_score(logits, k = 80.0):
-
+        def adjust_score(logits):
+            
+            k = self.k
             print("Received logits", logits)
             print('G_score', self.G_score)
             print('D_score', self.D_score)
