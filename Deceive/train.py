@@ -52,7 +52,8 @@ def setup_training_loop_kwargs(
     gamma        = None, # Override R1 gamma: <float>
     kimg         = None, # Override training duration: <int>
     batch        = None, # Override batch size: <int>
-
+    k = 100, #Default k if not selected
+    
     # Discriminator augmentation.
     aug          = None, # Augmentation mode: 'apa' (default), 'noaug', 'fixed'
     p            = None, # Specify p for 'fixed' (required): <float>
@@ -166,9 +167,10 @@ def setup_training_loop_kwargs(
             raise UserError(f'--metricdata: {err}')
 
     # ------------------------------------
-    # Base config: cfg, gamma, kimg, batch
+    # Base config: cfg, gamma, kimg, batch, k
     # ------------------------------------
 
+    args.k = k
     if cfg is None:
         cfg = 'auto'
     assert isinstance(cfg, str)
