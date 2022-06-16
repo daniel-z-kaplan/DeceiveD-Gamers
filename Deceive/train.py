@@ -147,7 +147,11 @@ def setup_training_loop_kwargs(
     # ----------------------------
 
     if metrics is None:
-        metrics = ['fid50k_full','kid50k_full','pr50k3_full','ppl2_wend','is50k']
+        metrics = ['fid50k_full','is50k']#['fid50k_full','kid50k_full','pr50k3_full','ppl2_wend','is50k']metric-fid50k_full.jsonl230 B28 minutes ago
+metric-kid50k_full.jsonl232 B22 minutes ago
+metric-pr50k3_full.jsonlmetric-fid50k_full.jsonl230 B28 minutes ago
+metric-kid50k_full.jsonl232 B22 minutes ago
+metric-pr50k3_full.jsonl
     assert isinstance(metrics, list)
     if not all(metric_main.is_valid_metric(metric) for metric in metrics):
         raise UserError('\n'.join(['--metrics can only contain the following values:'] + metric_main.list_valid_metrics()))
