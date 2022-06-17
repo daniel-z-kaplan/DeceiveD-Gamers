@@ -453,7 +453,7 @@ class CommaSeparatedList(click.ParamType):
 @click.option('--metricdata', help='Dataset to evaluate metrics against (directory or zip) [default: same as training data]', metavar='PATH')
 
 # Base config.
-@click.option('-k', help = 'k value determines how sharply to control discriminator learning', type = int, metavar = 'INT')
+@click.option('--k', help = 'k value determines how sharply to control discriminator learning', type = int, metavar = 'INT')
 @click.option('--cfg', help='Base config [default: auto]', type=click.Choice(['auto', 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar']))
 @click.option('--gamma', help='Override R1 gamma', type=float)
 @click.option('--kimg', help='Override training duration', type=int, metavar='INT')
